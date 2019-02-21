@@ -1,0 +1,9 @@
+[tool.black]
+line-length=79
+
+exclude = '''
+/(
+      env
+    | \.git
+)/
+'''
