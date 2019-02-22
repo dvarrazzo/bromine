@@ -40,6 +40,7 @@ Still reading? Sure?
 Well, I'll be honest: what I prefer to do is:
 
 ```python
+import bromine
 browser = bromine.Browser(driver)
 element = browser.get("http://example.com/").wait(id='myDynamicElement')
 ```
