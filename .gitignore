@@ -1,3 +1,5 @@
 *.egg-info
 /env
 /dist
+geckodriver.log
+/pip-wheel-metadata

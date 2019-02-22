@@ -1,0 +1,27 @@
+# docker-compose file to run the test with headless chrome browsers
+# Spin up a selenium hub and a browser connected to it.
+# The port 4444 is exposed to the host.
+# After the containers are running you can run tests with:
+#
+#   pytest --hub=http://localhost:4444/wd/hub
+
+version: '2'
+
+services:
+  selenium-hub:
+    image: selenium/hub:3.141.59
+    ports:
+      - "4444:4444"
+
+  chrome:
+    image: selenium/node-chrome:3.141.59
+    environment:
+      - HUB_PORT_4444_TCP_ADDR=selenium-hub
+      - HUB_PORT_4444_TCP_PORT=4444
+      - NODE_MAX_INSTANCES=10
+      - NODE_MAX_SESSION=10
+    volumes:
+      # Mitigates the Chromium issue described at
+      # https://code.google.com/p/chromium/issues/detail?id=519952
+      - /dev/shm:/dev/shm
+      - ./pages:/pages
