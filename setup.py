@@ -13,12 +13,17 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/GambitResearch/bromine",
     packages=setuptools.find_packages(),
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4',
     classifiers="""
         Development Status :: 4 - Beta
-        Programming Language :: Python :: 2
-        Programming Language :: Python :: 3
+        Framework :: Pytest
+        Intended Audience :: Developers
         License :: OSI Approved :: MIT License
         Operating System :: OS Independent
+        Programming Language :: Python :: 2.7
+        Programming Language :: Python :: 3
+        Topic :: Internet :: WWW/HTTP :: Browsers
+        Topic :: Software Development :: Testing
         """.strip().splitlines(),
     # Note: selenium 3.14 is broken on https requests
     install_requires=["six", "selenium<3.14"],
