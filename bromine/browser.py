@@ -118,7 +118,7 @@ class FutureElement:
             self._elem = ElemWrapper(wmeth(meth(*args)))
         except WebDriverException as e:
             do_raise(
-                WebDriverException(
+                type(e)(
                     "error waiting for '%s' to be %s%s%s: %s %s"
                     % (
                         ", ".join(
