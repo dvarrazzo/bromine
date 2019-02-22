@@ -1,14 +1,17 @@
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.common.exceptions import WebDriverException
 import selenium.webdriver.common.keys
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
 class Browser:
+    """
+    A wrapper for a selenium driver to simplify interaction.
+    """
 
     Keys = selenium.webdriver.common.keys.Keys
-    TimeoutException = TimeoutException
+    exceptions = selenium.common.exceptions
 
     def __init__(self, driver):
         self._driver = driver
