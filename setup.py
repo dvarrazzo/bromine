@@ -21,5 +21,5 @@ setuptools.setup(
         Operating System :: OS Independent
         """.strip().splitlines(),
     # Note: selenium 3.14 is broken on https requests
-    install_requires=["selenium<3.14"],
+    install_requires=["six", "selenium<3.14"],
 )

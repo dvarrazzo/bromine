@@ -1,3 +1,5 @@
+import six
+
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 import selenium.webdriver.common.keys
@@ -243,4 +245,7 @@ class element_containing_text:
 
 # Hack to shorten traceback in py.test
 def do_raise(e):
-    raise e
+    if six.PY3:
+        raise e.with_traceback(None)
+    else:
+        raise e

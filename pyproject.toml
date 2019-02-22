@@ -3,7 +3,7 @@ line-length=79
 
 exclude = '''
 /(
-      env
+      env\d*
     | \.git
 )/
 '''
