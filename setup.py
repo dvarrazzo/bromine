@@ -4,7 +4,7 @@ with open("README.md") as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="bromine",
+    name="gambit-bromine",
     version="0.1",
     author="Daniele Varrazzo",
     author_email="piro@gambitresearch.com",
