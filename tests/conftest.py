@@ -21,6 +21,19 @@ def pytest_addoption(parser):
 
 @pytest.fixture
 def driver(request):
+    driver = make_driver(request)
+    yield driver
+    driver.quit()
+
+
+@pytest.fixture(scope="session")
+def session_driver(request):
+    driver = make_driver(request)
+    yield driver
+    driver.quit()
+
+
+def make_driver(request):
     """Return a selenium driver according to the test configuration"""
     driver_name = request.config.getoption("--driver")
     opt_module = "selenium.webdriver.%s.options" % driver_name.lower()
@@ -43,17 +56,15 @@ def driver(request):
         wd_module = import_module(wd_module)
         driver = wd_module.WebDriver(options=options)
 
-    yield driver
-
-    driver.quit()
+    return driver
 
 
-@pytest.fixture
-def pages(driver):
+@pytest.fixture(scope='session')
+def pages(session_driver):
     """Return the url of a page from the test files"""
 
     def pages_(*path):
-        if type(driver) is selenium.webdriver.Remote:
+        if type(session_driver) is selenium.webdriver.Remote:
             path = os.path.join("/pages", *path)
         else:
             path = os.path.abspath(
