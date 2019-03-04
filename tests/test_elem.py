@@ -12,6 +12,22 @@ def page(session_driver, pages):
     return b
 
 
+def test_attrib(page):
+    e = page(text="Goodbye!")
+    assert e.attrib["class"] == "greet"
+
+    with pytest.raises(KeyError) as exc:
+        e.attrib["nosuchattrib"]
+
+    assert "nosuchattrib" in str(exc)
+
+
+def test_attrib_get(page):
+    e = page(text="Goodbye!")
+    assert e.attrib.get("class") == "greet"
+    assert e.attrib.get("nosuchattrib") is None
+
+
 def test_elem_css_selector(page):
     assert page.elem(css="p.greet").text == "Goodbye!"
     assert page.elem("p.greet").text == "Goodbye!"
@@ -59,7 +75,7 @@ Double quote end"
 )
 def test_elem_text_selector(idx, string, page):
     elem = page(text=string)
-    assert elem.get_attribute("data-idx") == str(idx)
+    assert elem.attrib["data-idx"] == str(idx)
 
     elem = page.elem(text=string)
-    assert elem.get_attribute("data-idx") == str(idx)
+    assert elem.attrib["data-idx"] == str(idx)

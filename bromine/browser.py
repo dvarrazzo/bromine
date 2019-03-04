@@ -219,6 +219,10 @@ class ElemWrapper:
 
     __call__ = elem
 
+    @property
+    def attrib(self):
+        return Attributes(self)
+
     def find(self, css=None, **kwargs):
         if css is not None:
             kwargs["css"] = css
@@ -279,6 +283,21 @@ class element_containing_text:
             pass
 
         return False
+
+
+class Attributes:
+    def __init__(self, elem):
+        self.elem = elem
+
+    def __getitem__(self, name):
+        rv = self.elem.get_attribute(name)
+        if rv is not None:
+            return rv
+        else:
+            raise KeyError("attribute not found: %s" % name)
+
+    def get(self, name):
+        return self.elem.get_attribute(name)
 
 
 # Hack to shorten traceback in py.test
