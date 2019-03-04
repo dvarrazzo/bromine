@@ -48,6 +48,7 @@ class Browser:
         "tag": By.TAG_NAME,
         "cls": By.CLASS_NAME,
         "css": By.CSS_SELECTOR,
+        "text": None,
     }
 
     @classmethod
@@ -55,16 +56,22 @@ class Browser:
         if selectors is None:
             selectors = cls.selectors
 
-        for k in kwargs:
-            if k not in selectors:
-                raise TypeError("bad selector: %s" % k)
         if not kwargs:
             raise TypeError("no selector specified")
         elif len(kwargs) > 1:
             raise TypeError("only one selector, please")
 
-        sel, val = list(kwargs.items())[0]
-        sel = selectors[sel]
+        selname, val = list(kwargs.items())[0]
+        try:
+            sel = selectors[selname]
+        except KeyError:
+            raise TypeError("bad selector: %s" % selname)
+
+        # Not supported by selenium, but it is handy.
+        if selname == "text":
+            sel = selectors["xpath"]
+            val = cls._text_to_xpath(val)
+
         return sel, val
 
     conditions = {"title_has": EC.title_contains, "title": EC.title_is}
@@ -82,6 +89,37 @@ class Browser:
         cond, val = list(kwargs.items())[0]
         cond = cls.conditions[cond]
         return cond, [val]
+
+    @classmethod
+    def _text_to_xpath(cls, s):
+        """Convert a string into an xpath expression to search it."""
+        # simple cases: the string has either no " or no '
+        dqs = s.count('"')
+        if not dqs:
+            return '//*[text()="%s"]' % s
+
+        sqs = s.count("'")
+        if not sqs:
+            return "//*[text()='%s']" % s
+
+        # split the string on the least number of " or ' and isolate each
+        # quote separately, as suggested in:
+        # https://sqa.stackexchange.com/questions/26341/#answer-26415
+        parts = []
+        if dqs < sqs:
+            for p in s.split('"'):
+                if p:
+                    parts.append('"%s"' % p)
+                parts.append("'\"'")
+
+        else:
+            for p in s.split("'"):
+                if p:
+                    parts.append("'%s'" % p)
+                parts.append('"\'"')
+
+        del parts[-1]
+        return "//*[text()=concat(%s)]" % ",".join(parts)
 
 
 class FutureElement:

@@ -40,3 +40,26 @@ def test_find_css(page):
     assert len(ps) >= 2
     assert ps[0].text.startswith("This is a test page")
     assert ps[-1].text == "Goodbye!"
+
+
+@pytest.mark.parametrize(
+    "idx, string",
+    enumerate(
+        """
+Single'quote
+'Single quote start
+Single quote end'
+Double"quote
+"Double quote start
+Double quote end"
+'A"bit'of""\"a'mix"
+"A'bit"of''\'a"mix'
+""".strip().splitlines()
+    ),
+)
+def test_elem_text_selector(idx, string, page):
+    elem = page(text=string)
+    assert elem.get_attribute("data-idx") == str(idx)
+
+    elem = page.elem(text=string)
+    assert elem.get_attribute("data-idx") == str(idx)
