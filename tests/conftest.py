@@ -59,7 +59,7 @@ def make_driver(request):
     return driver
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def pages(session_driver):
     """Return the url of a page from the test files"""
 

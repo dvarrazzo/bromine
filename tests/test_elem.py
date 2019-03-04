@@ -2,7 +2,7 @@ import pytest
 import bromine
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def page(session_driver, pages):
     b = bromine.Browser(session_driver)
     url = pages("elem.html")
