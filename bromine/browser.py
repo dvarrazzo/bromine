@@ -68,7 +68,7 @@ class Browser:
             raise TypeError("bad selector: %s" % selname)
 
         # Not supported by selenium, but it is handy.
-        if selname == "text":
+        if selname == "text" and sel is None:
             sel = selectors["xpath"]
             val = cls._text_to_xpath(val)
 
