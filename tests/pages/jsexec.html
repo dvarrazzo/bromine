@@ -3,23 +3,8 @@
     <title>
       Javascript execution page
     </title>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script>
-      $(function() {
-        $('#execute').click(function() {
-          $('<script>')
-            .attr('type', 'text/javascript')
-            .text($('textarea').val())
-            .appendTo('head');
-        });
-      });
-    </script>
   </head>
   <body>
-    <div>
-      <textarea cols="80" rows="10"></textarea>
-      <input type="button" id="execute" value="execute"/>
-    </div>
     <div id=content></div>
   </body>
 </html>

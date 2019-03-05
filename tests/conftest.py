@@ -2,16 +2,13 @@ import os
 from importlib import import_module
 
 import pytest
-import selenium.webdriver
 from selenium.webdriver.remote.remote_connection import RemoteConnection
-
-import bromine
 
 
 def pytest_addoption(parser):
     parser.addoption(
         "--driver",
-        help="The browser to run tests with. default: %(default)s",
+        help="The browser to run tests with [default: %(default)s]",
         default="Chrome",
     )
     parser.addoption(
@@ -60,33 +57,13 @@ def make_driver(request):
 
 
 @pytest.fixture(scope="session")
-def pages(session_driver):
+def pages(request):
     """Return the url of a page from the test files"""
 
     def pages_(*path):
-        if type(session_driver) is selenium.webdriver.Remote:
-            path = os.path.join("/pages", *path)
-        else:
-            path = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), "pages", *path)
-            )
+        path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "pages", *path)
+        )
         return "file://" + path
 
     return pages_
-
-
-@pytest.fixture
-def jsexec(driver, pages):
-    """Execute some javascript in a browser page"""
-
-    def jsexec_(jscode):
-        b = bromine.Browser(driver)
-
-        url = pages("jsexec.html")
-        if b.current_url != url:
-            b.get(url)
-
-        b("textarea").clear().send_keys(jscode)
-        b("#execute").click()
-
-    return jsexec_
