@@ -82,7 +82,7 @@ class Browser:
         # Not supported by selenium, but it is handy.
         if selname == "text" and sel is None:
             sel = selectors["xpath"]
-            val = cls._text_to_xpath(val)
+            val = "//*[text()=%s]" % cls._quote_xpath(val)
 
         return sel, val
 
@@ -103,16 +103,16 @@ class Browser:
         return cond, [val]
 
     @classmethod
-    def _text_to_xpath(cls, s):
-        """Convert a string into an xpath expression to search it."""
+    def _quote_xpath(cls, s):
+        """Quote a string to use as a literal into an xpath expression."""
         # simple cases: the string has either no " or no '
         dqs = s.count('"')
         if not dqs:
-            return '//*[text()="%s"]' % s
+            return '"%s"' % s
 
         sqs = s.count("'")
         if not sqs:
-            return "//*[text()='%s']" % s
+            return "'%s'" % s
 
         # split the string on the least number of " or ' and isolate each
         # quote separately, as suggested in:
@@ -131,7 +131,7 @@ class Browser:
                 parts.append('"\'"')
 
         del parts[-1]
-        return "//*[text()=concat(%s)]" % ",".join(parts)
+        return "concat(%s)" % ",".join(parts)
 
 
 class FutureElement:
