@@ -6,6 +6,8 @@ import selenium.webdriver.common.keys
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+on_pytest = 0
+
 
 class Browser:
     """
@@ -129,6 +131,8 @@ class FutureElement:
         self._elem = None
 
     def wait(self, condition="present", arg=None):
+        __tracebackhide__ = True
+
         neg = False
         if condition.split(None, 1)[0] == "not":
             neg = True
@@ -157,25 +161,21 @@ class FutureElement:
         try:
             self._elem = ElemWrapper(wmeth(meth(*args)))
         except WebDriverException as e:
-            do_raise(
-                type(e)(
-                    "error waiting for '%s' to be %s%s%s: %s %s"
-                    % (
-                        ", ".join(
-                            "%s: %s" % p for p in sorted(self._kwargs.items())
-                        ),
-                        neg and "not " or "",
-                        condition,
-                        " (%s)" % arg if arg is not None else "",
-                        e.__class__.__name__,
-                        e,
-                    )
-                )
+            msg = "error waiting for '%s' to be %s%s%s: %s %s" % (
+                ", ".join("%s: %s" % p for p in sorted(self._kwargs.items())),
+                neg and "not " or "",
+                condition,
+                " (%s)" % arg if arg is not None else "",
+                e.__class__.__name__,
+                e,
             )
+            do_raise(type(e)(msg))
 
         return self._elem
 
     def __getattr__(self, attr):
+        __tracebackhide__ = True
+
         if self._elem is None:
             sel, val = self._browser._get_selector(self._kwargs)
             try:
@@ -209,6 +209,8 @@ class ElemWrapper:
         self._elem = elem
 
     def elem(self, css=None, **kwargs):
+        __tracebackhide__ = True
+
         if css is not None:
             kwargs["css"] = css
         sel, val = Browser._get_selector(kwargs)
@@ -302,6 +304,13 @@ class Attributes:
 
 # Hack to shorten traceback in py.test
 def do_raise(e):
+    __tracebackhide__ = True
+
+    if on_pytest:
+        import pytest
+
+        pytest.fail(str(e))
+
     if six.PY3:
         raise e.with_traceback(None)
     else:

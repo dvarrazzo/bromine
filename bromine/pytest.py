@@ -43,7 +43,7 @@ def browser(request):
     except ImportError:
         pytest.skip("selenium not available")
 
-    from .browser import Browser
+    from . import browser
 
     remote_url = request.config.getoption("--selenium-hub")
     if not remote_url:
@@ -81,12 +81,14 @@ def browser(request):
     if r is None:
         pytest.fail("error opening remote browser: %s" % exc)
 
-    b = Browser(r)
-
+    browser.on_pytest += 1
+    b = browser.Browser(r)
     request.node._browser = b
 
-    request.addfinalizer(b.quit)
-    return b
+    yield b
+
+    browser.on_pytest -= 1
+    b.quit()
 
 
 @pytest.hookimpl(hookwrapper=True)
