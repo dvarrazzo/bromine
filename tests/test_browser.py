@@ -55,3 +55,13 @@ def test_click_implicit_wait(driver, pages):
     )
     b("#clickme").click()
     assert b.title == "Hello page!"
+
+
+def test_get_path_only(driver, pages):
+    b = bromine.Browser(driver)
+    b.get(pages("jsexec.html"))
+    path = pages("elem.html")
+    assert path.startswith("file://"), "you should fix this test for %s" % path
+    path = path.replace("file://", "")
+    b.get(path)
+    assert b.current_url == pages("elem.html")

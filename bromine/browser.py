@@ -1,5 +1,7 @@
 import six
 
+from urllib.parse import urlparse
+
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 import selenium.webdriver.common.keys
@@ -23,6 +25,14 @@ class Browser:
 
     def __getattr__(self, attr):
         return getattr(self._driver, attr)
+
+    def get(self, url):
+        # Add the domain to a path-only url
+        if url.startswith("/"):
+            parts = urlparse(self._driver.current_url)
+            url = parts._replace(path=url).geturl()
+
+        return self._driver.get(url)
 
     def elem(self, css=None, **kwargs):
         if css is not None:
