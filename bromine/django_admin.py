@@ -1,7 +1,4 @@
-from .select2 import Select2
-
-
-class DjangoAdmin:
+class DjangoAdminMixin:
     """A mixin to add django-admin utilities to a browser.
     """
 
@@ -55,7 +52,7 @@ class DjangoAdminFields:
         except self.browser.exceptions.NoSuchElementException:
             raise KeyError("field not found: %s" % name)
 
-        return FieldWrapper(elem, self.browser)
+        return FieldWrapper(elem)
 
 
 class DjangoAdminWidgets:
@@ -70,9 +67,8 @@ class DjangoAdminWidgets:
 
 
 class FieldWrapper:
-    def __init__(self, elem, browser):
+    def __init__(self, elem):
         self.elem = elem
-        self.browser = browser
 
     def __getattr__(self, attr):
         return getattr(self.elem, attr)
@@ -83,7 +79,3 @@ class FieldWrapper:
     @property
     def errors(self):
         return self.elem.find("ul.errorlist li")
-
-    @property
-    def select2(self):
-        return Select2(self.browser, self.elem)

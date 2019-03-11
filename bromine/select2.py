@@ -1,3 +1,8 @@
+class Select2Mixin:
+    def select2(self, elem):
+        return Select2(self, elem)
+
+
 class Select2:
     """A wrapper for an element containing a select2 object.
     """
