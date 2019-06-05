@@ -25,6 +25,5 @@ setuptools.setup(
         Topic :: Internet :: WWW/HTTP :: Browsers
         Topic :: Software Development :: Testing
         """.strip().splitlines(),
-    # Note: selenium 3.14 is broken on https requests
-    install_requires=["six", "selenium<3.14"],
+    install_requires=["six", "selenium>=3.141,<3.142"],
 )
