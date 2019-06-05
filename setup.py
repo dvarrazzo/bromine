@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setuptools.setup(
     name="gambit-bromine",
-    version="0.3",
+    version="0.3.1.dev0",
     author="Daniele Varrazzo",
     author_email="piro@gambitresearch.com",
     description="Pythonic web testing",
@@ -25,6 +25,5 @@ setuptools.setup(
         Topic :: Internet :: WWW/HTTP :: Browsers
         Topic :: Software Development :: Testing
         """.strip().splitlines(),
-    # Note: selenium 3.14 is broken on https requests
-    install_requires=["six", "selenium<3.14"],
+    install_requires=["six", "selenium>=3.141,<3.142"],
 )
