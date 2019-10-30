@@ -9,12 +9,12 @@ version: '2'
 
 services:
   selenium-hub:
-    image: selenium/hub:3.141.59
+    image: selenium/hub:3.141.59-palladium
     ports:
       - "4444:4444"
 
   chrome:
-    image: selenium/node-chrome:3.141.59
+    image: selenium/node-chrome:3.141.59-palladium
     environment:
       - HUB_PORT_4444_TCP_ADDR=selenium-hub
       - HUB_PORT_4444_TCP_PORT=4444
