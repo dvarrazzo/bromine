@@ -7,6 +7,7 @@ from selenium.common.exceptions import WebDriverException
 import selenium.webdriver.common.keys
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 
 on_pytest = 0
 
@@ -50,6 +51,10 @@ class Browser:
     def wait(self, **kwargs):
         meth, args = self._get_condition(kwargs)
         return ElemWrapper(self._wait.until(meth(*args)))
+
+    @property
+    def actions(self):
+        return ActionChainWrapper(ActionChains(self._driver))
 
     selectors = {
         "id": By.ID,
@@ -310,6 +315,17 @@ class Attributes:
 
     def get(self, name):
         return self.elem.get_attribute(name)
+
+
+class ActionChainWrapper:
+    def __init__(self, chain):
+        self._chain = chain
+
+    def __getattr__(self, name):
+        return getattr(self._chain, name)
+
+    def move_to_element(self, elem):
+        return self._chain.move_to_element(elem.wait()._elem)
 
 
 # Hack to shorten traceback in py.test
