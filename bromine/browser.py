@@ -26,6 +26,12 @@ class Browser:
     def __getattr__(self, attr):
         return getattr(self._driver, attr)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        self.close()
+
     def get(self, url):
         # Add the domain to a path-only url
         if url.startswith("/"):
