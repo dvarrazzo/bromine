@@ -38,6 +38,17 @@ def pytest_addoption(parser):
 def browser(request):
     """Return a selenium driver to browse for testing
     """
+    return _browser(request)
+
+
+@pytest.fixture(scope="session")
+def sbrowser(request):
+    """Return a session-shared selenium driver to browse for testing
+    """
+    return _browser(request)
+
+
+def _browser(request):
     try:
         from selenium import webdriver
     except ImportError:
