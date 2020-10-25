@@ -38,14 +38,16 @@ def pytest_addoption(parser):
 def browser(request):
     """Return a selenium driver to browse for testing
     """
-    return _browser(request)
+    for item in _browser(request):
+        yield item
 
 
 @pytest.fixture(scope="session")
 def sbrowser(request):
     """Return a session-shared selenium driver to browse for testing
     """
-    return _browser(request)
+    for item in _browser(request):
+        yield item
 
 
 def _browser(request):
