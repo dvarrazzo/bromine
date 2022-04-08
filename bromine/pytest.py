@@ -9,10 +9,11 @@ import os
 import pytest
 from importlib import import_module
 
+from selenium import webdriver
+
 # set a global timeout for selenium request: sometimes we get random errors
 # creating a new session, with a java traceback, and it takes several minutes
 from selenium.webdriver.remote.remote_connection import RemoteConnection
-
 RemoteConnection.set_timeout(20)
 
 
@@ -35,26 +36,21 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="function")
-def browser(request):
+def browser(request, options):
     """Return a selenium driver to browse for testing
     """
-    try:
-        from selenium import webdriver
-    except ImportError:
-        pytest.skip("selenium not available")
-
-    from . import browser
-
-    remote_url = request.config.getoption("--selenium-hub")
-    if not remote_url:
-        raise pytest.skip(
-            "no hub specified to run the tests (use --selenium-hub)"
-        )
-
     ssdir = request.config.getoption("--screenshots-dir")
     if ssdir:
         request.node._screenshots_dir = ssdir
 
+    if request.config.getoption("--selenium-hub"):
+        yield from _remote_browser(request, options)
+    else:
+        yield from _local_browser(request, options)
+
+
+@pytest.fixture(scope="session")
+def options(request):
     driver_name = request.config.getoption("--selenium-driver")
     optmodule = "selenium.webdriver.%s.options" % driver_name.lower()
     try:
@@ -66,13 +62,44 @@ def browser(request):
     # TODO: only tested with Chrome
     opt.add_argument("--window-size=1280,1024")
 
+    return opt
+
+
+def _local_browser(request, options):
+    from . import browser
+
+    driver_name = request.config.getoption("--selenium-driver")
+    drvmodule = "selenium.webdriver.%s.webdriver" % driver_name.lower()
+    try:
+        drvmodule = import_module(drvmodule)
+    except ImportError:
+        raise pytest.fail("unknown selenium driver: %s" % driver_name)
+
+    drv = drvmodule.WebDriver(options=options)
+
+    browser.on_pytest += 1
+    b = browser.Browser(drv)
+    request.node._browser = b
+
+    yield b
+
+    browser.on_pytest -= 1
+    b.quit()
+
+
+def _remote_browser(request, options):
+    from . import browser
+
+    remote_url = request.config.getoption("--selenium-hub")
+    assert remote_url
+
     # Sometimes we get an error with this request: try a few times
     r = None
     exc = None
     for i in range(3):
         try:
             r = webdriver.Remote(
-                RemoteConnection(remote_url, resolve_ip=False), options=opt
+                RemoteConnection(remote_url, resolve_ip=False), options=options
             )
             break
         except Exception as e:
