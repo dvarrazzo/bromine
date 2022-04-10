@@ -21,7 +21,6 @@ class Browser:
 
     def __init__(self, driver):
         self._driver = driver
-        self._wait = WebDriverWait(driver, 2, poll_frequency=0.1)
 
     def __getattr__(self, attr):
         return getattr(self._driver, attr)
@@ -47,9 +46,15 @@ class Browser:
         sel, val = self._get_selector(kwargs)
         return [ElemWrapper(i) for i in self._driver.find_elements(sel, val)]
 
-    def wait(self, **kwargs):
+    def wait(self, timeout=None, **kwargs):
+        waiter = self._get_waiter(timeout=timeout)
         meth, args = self._get_condition(kwargs)
-        return ElemWrapper(self._wait.until(meth(*args)))
+        return ElemWrapper(waiter.until(meth(*args)))
+
+    def _get_waiter(self, timeout=None):
+        if not timeout:
+            timeout = 2
+        return WebDriverWait(self._driver, timeout, poll_frequency=0.1)
 
     selectors = {
         "id": By.ID,
@@ -140,7 +145,7 @@ class FutureElement:
         self._kwargs = kwargs
         self._elem = None
 
-    def wait(self, condition="present", arg=None):
+    def wait(self, condition="present", arg=None, timeout=None):
         __tracebackhide__ = True
 
         neg = False
@@ -163,7 +168,7 @@ class FutureElement:
             raise TypeError("bad condition: %s" % condition)
 
         sel, val = self._browser._get_selector(self._kwargs)
-        wait = self._browser._wait
+        wait = self._browser._get_waiter(timeout=timeout)
         wmeth = wait.until if not neg else wait.until_not
         args = [(sel, val)]
         if arg is not None:
