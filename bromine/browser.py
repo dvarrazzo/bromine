@@ -46,10 +46,14 @@ class Browser:
         sel, val = self._get_selector(kwargs)
         return [ElemWrapper(i) for i in self._driver.find_elements(sel, val)]
 
-    def wait(self, timeout=None, **kwargs):
+    def wait(self, callable=None, timeout=None, **kwargs):
         waiter = self._get_waiter(timeout=timeout)
-        meth, args = self._get_condition(kwargs)
-        return ElemWrapper(waiter.until(meth(*args)))
+
+        if callable:
+            return waiter.until(callable)
+        else:
+            meth, args = self._get_condition(kwargs)
+            return ElemWrapper(waiter.until(meth(*args)))
 
     def _get_waiter(self, timeout=None):
         if not timeout:
