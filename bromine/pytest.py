@@ -42,17 +42,19 @@ def pytest_addoption(parser):
     )
 
 
+@pytest.fixture(scope="session")
+def browser_factory(request):
+    return BrowserFactory(request)
+
+
 @pytest.fixture(scope="function")
-def browser(request, options):
+def browser(browser_factory, request, options):
     """Return a selenium driver to browse for testing"""
     ssdir = request.config.getoption("--screenshots-dir")
     if ssdir:
         request.node._screenshots_dir = ssdir
 
-    if request.config.getoption("--selenium-hub"):
-        yield from _remote_browser(request, options)
-    else:
-        yield from _local_browser(request, options)
+    yield from browser_factory.yield_browser(options)
 
 
 @pytest.fixture(scope="session")
@@ -73,57 +75,66 @@ def options(request):
     return opt
 
 
-def _local_browser(request, options):
-    from . import browser
+class BrowserFactory:
+    def __init__(self, request):
+        self.request = request
 
-    driver_name = request.config.getoption("--selenium-driver")
-    drvmodule = "selenium.webdriver.%s.webdriver" % driver_name.lower()
-    try:
-        drvmodule = import_module(drvmodule)
-    except ImportError:
-        raise pytest.fail("unknown selenium driver: %s" % driver_name)
+    def yield_browser(self, options):
+        if self.request.config.getoption("--selenium-hub"):
+            yield from self._yield_remote_browser(options)
+        else:
+            yield from self._yield_local_browser(options)
 
-    drv = drvmodule.WebDriver(options=options)
+    def _yield_local_browser(self, options):
+        from . import browser
 
-    browser.on_pytest += 1
-    b = browser.Browser(drv)
-    request.node._browser = b
-
-    yield b
-
-    browser.on_pytest -= 1
-    b.quit()
-
-
-def _remote_browser(request, options):
-    from . import browser
-
-    remote_url = request.config.getoption("--selenium-hub")
-    assert remote_url
-
-    # Sometimes we get an error with this request: try a few times
-    r = None
-    exc = None
-    for i in range(3):
+        driver_name = self.request.config.getoption("--selenium-driver")
+        drvmodule = "selenium.webdriver.%s.webdriver" % driver_name.lower()
         try:
-            r = webdriver.Remote(
-                RemoteConnection(remote_url, resolve_ip=False), options=options
-            )
-            break
-        except Exception as e:
-            exc = e
+            drvmodule = import_module(drvmodule)
+        except ImportError:
+            raise pytest.fail("unknown selenium driver: %s" % driver_name)
 
-    if r is None:
-        pytest.fail("error opening remote browser: %s" % exc)
+        drv = drvmodule.WebDriver(options=options)
 
-    browser.on_pytest += 1
-    b = browser.Browser(r)
-    request.node._browser = b
+        browser.on_pytest += 1
+        b = browser.Browser(drv)
+        self.request.node._browser = b
 
-    yield b
+        yield b
 
-    browser.on_pytest -= 1
-    b.quit()
+        browser.on_pytest -= 1
+        b.quit()
+
+    def _yield_remote_browser(self, options):
+        from . import browser
+
+        remote_url = self.request.config.getoption("--selenium-hub")
+        assert remote_url
+
+        # Sometimes we get an error with this request: try a few times
+        r = None
+        exc = None
+        for i in range(3):
+            try:
+                r = webdriver.Remote(
+                    RemoteConnection(remote_url, resolve_ip=False), options=options
+                )
+                break
+            except Exception as e:
+                exc = e
+
+        if r is None:
+            pytest.fail("error opening remote browser: %s" % exc)
+
+        browser.on_pytest += 1
+        b = browser.Browser(r)
+        self.request.node._browser = b
+
+        yield b
+
+        browser.on_pytest -= 1
+        b.quit()
 
 
 @pytest.hookimpl(hookwrapper=True)
