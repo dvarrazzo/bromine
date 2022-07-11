@@ -4,8 +4,7 @@ class Select2Mixin:
 
 
 class Select2:
-    """A wrapper for an element containing a select2 object.
-    """
+    """A wrapper for an element containing a select2 object."""
 
     def __init__(self, browser, elem):
         self.browser = browser
@@ -29,9 +28,7 @@ class Select2:
         return self
 
     def select(self, text):
-        self.browser(
-            xpath="//li[text()=%s]" % self.browser._quote_xpath(text)
-        ).click()
+        self.browser(xpath="//li[text()=%s]" % self.browser._quote_xpath(text)).click()
         return self
 
     @property
@@ -39,9 +36,8 @@ class Select2:
         return Select2Options(self)
 
     def wait_option(self, text, condition="present"):
-        self.browser(
-            xpath="//li[text()=]" % self.browser._quote_xpath(text)
-        ).wait(condition)
+        el = self.browser(xpath="//li[text()=%s]" % self.browser._quote_xpath(text))
+        el.wait(condition)
         return self
 
 

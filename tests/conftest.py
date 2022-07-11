@@ -45,9 +45,7 @@ def make_driver(request):
     if hub:
         from selenium.webdriver.remote.webdriver import WebDriver
 
-        driver = WebDriver(
-            RemoteConnection(hub, resolve_ip=False), options=options
-        )
+        driver = WebDriver(RemoteConnection(hub, resolve_ip=False), options=options)
     else:
         wd_module = "selenium.webdriver.%s.webdriver" % driver_name.lower()
         wd_module = import_module(wd_module)
@@ -61,9 +59,7 @@ def pages(request):
     """Return the url of a page from the test files"""
 
     def pages_(*path):
-        path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "pages", *path)
-        )
+        path = os.path.abspath(os.path.join(os.path.dirname(__file__), "pages", *path))
         return "file://" + path
 
     return pages_

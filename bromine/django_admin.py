@@ -1,6 +1,5 @@
 class DjangoAdminMixin:
-    """A mixin to add django-admin utilities to a browser.
-    """
+    """A mixin to add django-admin utilities to a browser."""
 
     def click_save(self):
         return self(xpath="//input[@name='_save']").click()
@@ -12,9 +11,7 @@ class DjangoAdminMixin:
         return self(xpath="//input[@name='_addanother']").click()
 
     def click_input(self, value):
-        return self(
-            xpath="//input[@value=%s]" % self._quote_xpath(value)
-        ).click()
+        return self(xpath="//input[@value=%s]" % self._quote_xpath(value)).click()
 
     @property
     def success_msgs(self):

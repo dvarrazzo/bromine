@@ -11,10 +11,10 @@ from importlib import import_module
 
 import pytest
 from selenium import webdriver
+from selenium.webdriver.remote.remote_connection import RemoteConnection
 
 # set a global timeout for selenium request: sometimes we get random errors
 # creating a new session, with a java traceback, and it takes several minutes
-from selenium.webdriver.remote.remote_connection import RemoteConnection
 RemoteConnection.set_timeout(20)
 
 
@@ -44,8 +44,7 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="function")
 def browser(request, options):
-    """Return a selenium driver to browse for testing
-    """
+    """Return a selenium driver to browse for testing"""
     ssdir = request.config.getoption("--screenshots-dir")
     if ssdir:
         request.node._screenshots_dir = ssdir
