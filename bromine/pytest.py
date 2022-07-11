@@ -6,9 +6,10 @@ with virtual displays.
 
 import re
 import os
-import pytest
+import shlex
 from importlib import import_module
 
+import pytest
 from selenium import webdriver
 
 # set a global timeout for selenium request: sometimes we get random errors
@@ -32,6 +33,12 @@ def pytest_addoption(parser):
         "--selenium-driver",
         default="Chrome",
         help="what selenium driver to use? [default: %(default)s]",
+    )
+
+    parser.addoption(
+        "--selenium-driver-args",
+        help="arguments to pass to the selenium driver",
+        default="--window-size=1280,1024",
     )
 
 
@@ -59,8 +66,10 @@ def options(request):
         raise pytest.fail("unknown selenium driver: %s" % driver_name)
 
     opt = optmodule.Options()
-    # TODO: only tested with Chrome
-    opt.add_argument("--window-size=1280,1024")
+    args_in = request.config.getoption("--selenium-driver-args")
+    if args_in:
+        for arg in shlex.split(args_in):
+            opt.add_argument(arg)
 
     return opt
 
