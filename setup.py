@@ -24,6 +24,6 @@ setuptools.setup(
         Topic :: Internet :: WWW/HTTP :: Browsers
         Topic :: Software Development :: Testing
         """.strip().splitlines(),
-    install_requires=["selenium>=3.141,<3.142"],
+    install_requires=["selenium"],
     entry_points={"pytest11": ["bromine = bromine.pytest"]},
 )
