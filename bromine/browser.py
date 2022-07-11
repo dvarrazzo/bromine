@@ -1,5 +1,3 @@
-import six
-
 from urllib.parse import urlparse
 
 from selenium.webdriver.common.by import By
@@ -330,7 +328,4 @@ def do_raise(e):
 
         pytest.fail(str(e))
 
-    if six.PY3:
-        raise e.with_traceback(None)
-    else:
-        raise e
+    raise e.with_traceback(None)
