@@ -11,7 +11,7 @@ setuptools.setup(
     description="Pythonic web testing",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/GambitResearch/bromine",
+    url="https://github.com/dvarrazzo/bromine",
     packages=setuptools.find_packages(),
     python_requires=">=3.8",
     classifiers="""
