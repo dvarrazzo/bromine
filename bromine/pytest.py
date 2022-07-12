@@ -21,23 +21,26 @@ RemoteConnection.set_timeout(20)
 
 
 def pytest_addoption(parser):
-    parser.addoption(
+    group = parser.getgroup("bromine", "Bromine integration with Selenium")
+
+    group.addoption(
         "--selenium-hub",
-        help="run web tests using this hub, e.g. 'http://localhost:4444/wd/hub'",
+        help="run web tests using this hub, e.g. 'http://localhost:4444/wd/hub';"
+        " if omitted, run tests locally",
     )
 
-    parser.addoption(
+    group.addoption(
         "--screenshots-dir",
         help="if specified save screenshots of failing tests there",
     )
 
-    parser.addoption(
+    group.addoption(
         "--selenium-driver",
         default="Chrome",
         help="what selenium driver to use? [default: %(default)s]",
     )
 
-    parser.addoption(
+    group.addoption(
         "--selenium-driver-args",
         help="arguments to pass to the selenium driver",
         default="--window-size=1280,1024",
