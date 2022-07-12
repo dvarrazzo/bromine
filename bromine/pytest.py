@@ -7,7 +7,7 @@ with virtual displays.
 import re
 import os
 import shlex
-from typing import Optional
+from typing import List, Optional, Sequence
 from importlib import import_module
 from contextlib import contextmanager
 
@@ -68,24 +68,6 @@ def browser(browser_factory, request, options):
         browser.on_pytest -= 1
 
 
-@pytest.fixture(scope="session")
-def options(request):
-    driver_name = request.config.getoption("--selenium-driver")
-    optmodule = "selenium.webdriver.%s.options" % driver_name.lower()
-    try:
-        optmodule = import_module(optmodule)
-    except ImportError:
-        raise pytest.fail("unknown selenium driver: %s" % driver_name)
-
-    opt = optmodule.Options()
-    args_in = request.config.getoption("--selenium-driver-args")
-    if args_in:
-        for arg in shlex.split(args_in):
-            opt.add_argument(arg)
-
-    return opt
-
-
 class BrowserFactory:
     def __init__(self, selenium_hub: Optional[str] = None):
         self.selenium_hub = selenium_hub
@@ -134,6 +116,44 @@ class BrowserFactory:
             yield b
         finally:
             b.quit()
+
+
+@pytest.fixture(scope="session")
+def options_factory(request):
+    driver = request.config.getoption("--selenium-driver")
+    args_in = request.config.getoption("--selenium-driver-args")
+    args = shlex.split(args_in) if args_in else []
+    return OptionFactory(driver=driver, args=args)
+
+
+@pytest.fixture(scope="session")
+def options(options_factory):
+    return options_factory.options()
+
+
+class OptionFactory:
+    def __init__(self, driver: str, args: Sequence[str] = ()):
+        self.driver = driver
+        self.args = args[:]
+
+    def options(self, driver: Optional[str] = None, args: Optional[List[str]] = None):
+        if not driver:
+            driver = self.driver
+        driver = driver.lower()
+        if not args:
+            args = self.args
+
+        optmodule = "selenium.webdriver.%s.options" % driver.lower()
+        try:
+            optmodule = import_module(optmodule)
+        except ImportError:
+            raise pytest.fail("unknown selenium driver: %s" % driver)
+
+        opt = optmodule.Options()
+        for arg in args:
+            opt.add_argument(arg)
+
+        return opt
 
 
 def browser_class_from_options(options):
