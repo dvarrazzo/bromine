@@ -9,6 +9,7 @@ import os
 import shlex
 from typing import Optional
 from importlib import import_module
+from contextlib import contextmanager
 
 import pytest
 from selenium import webdriver
@@ -58,7 +59,7 @@ def browser(browser_factory, request, options):
 
     from . import browser
 
-    for b in browser_factory.yield_browser(options):
+    with browser_factory.browser(options) as b:
         browser.on_pytest += 1
         request.node._browser = b
 
@@ -89,7 +90,8 @@ class BrowserFactory:
     def __init__(self, selenium_hub: Optional[str] = None):
         self.selenium_hub = selenium_hub
 
-    def yield_browser(self, options):
+    @contextmanager
+    def browser(self, options):
         if self.selenium_hub:
             yield from self._yield_remote_browser(options)
         else:
