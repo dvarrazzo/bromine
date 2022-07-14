@@ -185,7 +185,7 @@ class FutureElement:
                 condition,
                 " (%s)" % arg if arg is not None else "",
                 e.__class__.__name__,
-                e,
+                str(e).splitlines()[0],
             )
             do_raise(type(e)(msg))
 
