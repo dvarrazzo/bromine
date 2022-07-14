@@ -19,6 +19,7 @@ class Browser:
 
     def __init__(self, driver):
         self._driver = driver
+        self.timeout = 2.0
 
     def __getattr__(self, attr):
         return getattr(self._driver, attr)
@@ -55,7 +56,7 @@ class Browser:
 
     def _get_waiter(self, timeout=None):
         if not timeout:
-            timeout = 2
+            timeout = self.timeout
         return WebDriverWait(self._driver, timeout, poll_frequency=0.1)
 
     selectors = {
