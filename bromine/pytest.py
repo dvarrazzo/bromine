@@ -104,7 +104,7 @@ class BrowserFactory:
         for i in range(3):
             try:
                 r = webdriver.Remote(
-                    RemoteConnection(self.selenium_hub, resolve_ip=False),
+                    RemoteConnection(self.selenium_hub),
                     options=options,
                 )
                 break
