@@ -50,37 +50,39 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="session")
 def browser_factory(request):
     selenium_hub = request.config.getoption("--selenium-hub")
-    return BrowserFactory(selenium_hub=selenium_hub)
+    return BrowserFactory(selenium_hub=selenium_hub, request=request)
 
 
 @pytest.fixture(scope="function")
 def browser(browser_factory, request, options):
     """Return a selenium driver to browse for testing"""
-    ssdir = request.config.getoption("--screenshots-dir")
-    if ssdir:
-        request.node._screenshots_dir = ssdir
-
-    from . import browser
-
-    with browser_factory.browser(options) as b:
-        browser.on_pytest += 1
-        request.node._browser = b
-
-        yield b
-
-        browser.on_pytest -= 1
+    yield from browser_factory.browser(options)
 
 
 class BrowserFactory:
-    def __init__(self, selenium_hub: Optional[str] = None):
+    def __init__(self, selenium_hub: Optional[str] = None, request=None):
         self.selenium_hub = selenium_hub
+        self._request = request
 
     @contextmanager
     def browser(self, options):
+        from . import browser
+
         if self.selenium_hub:
-            yield from self._yield_remote_browser(options)
+            gen = self._yield_remote_browser(options)
         else:
-            yield from self._yield_local_browser(options)
+            gen = self._yield_local_browser(options)
+
+        self._setup_screenshot_dir()
+
+        for b in gen:
+            browser.on_pytest += 1
+            if self._request:
+                self._request.node._browser = b
+
+            yield b
+
+            browser.on_pytest -= 1
 
     def _yield_local_browser(self, options):
         from . import browser
@@ -120,6 +122,14 @@ class BrowserFactory:
         finally:
             b.quit()
 
+    def _setup_screenshot_dir(self):
+        if not self._request:
+            return
+
+        ssdir = self._request.config.getoption("--screenshots-dir")
+        if ssdir:
+            self._request.node._screenshots_dir = ssdir
+
 
 @pytest.fixture(scope="session")
 def options_factory(request):
@@ -137,7 +147,7 @@ def options(options_factory):
 class OptionFactory:
     def __init__(self, driver: str, args: Sequence[str] = ()):
         self.driver = driver
-        self.args = args[:]
+        self.args = list(args)
 
     def options(self, driver: Optional[str] = None, args: Optional[List[str]] = None):
         if not driver:
