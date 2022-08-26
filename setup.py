@@ -7,7 +7,7 @@ setuptools.setup(
     name="gambit-bromine",
     version="0.4.1",
     author="Daniele Varrazzo",
-    author_email="piro@gambitresearch.com",
+    author_email="daniele.varrazzo@gmail.com",
     description="Pythonic web testing",
     long_description=long_description,
     long_description_content_type="text/markdown",
