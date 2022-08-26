@@ -56,7 +56,8 @@ def browser_factory(request):
 @pytest.fixture(scope="function")
 def browser(browser_factory, request, options):
     """Return a selenium driver to browse for testing"""
-    yield from browser_factory.browser(options)
+    with browser_factory.browser(options) as browser:
+        yield browser
 
 
 class BrowserFactory:
