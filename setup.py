@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setuptools.setup(
     name="gambit-bromine",
-    version="0.4.1",
+    version="0.4.2",
     author="Daniele Varrazzo",
     author_email="daniele.varrazzo@gmail.com",
     description="Pythonic web testing",
