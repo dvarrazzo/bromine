@@ -1,12 +1,31 @@
+import functools
+import time
 from urllib.parse import urlparse
 
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, StaleElementReferenceException, TimeoutException
 import selenium.webdriver.common.keys
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 on_pytest = 0
+
+
+def retry_stale(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        timeout = 10
+        start = time.time()
+        while True:
+            try:
+                return func(*args, **kwargs)
+            except StaleElementReferenceException as e:
+                if time.time() > start + timeout:
+                    raise TimeoutException(
+                        f"Retry failed; {e} has been repeatedly raised for {timeout} seconds"
+                    )
+                time.sleep(1)
+    return wrapper
 
 
 class Browser:
@@ -57,7 +76,8 @@ class Browser:
     def _get_waiter(self, timeout=None):
         if not timeout:
             timeout = self.timeout
-        return WebDriverWait(self._driver, timeout, poll_frequency=0.1)
+        return WebDriverWait(self._driver, timeout, poll_frequency=0.1,
+                             ignored_exceptions=[StaleElementReferenceException])
 
     selectors = {
         "id": By.ID,
@@ -205,18 +225,22 @@ class FutureElement:
 
     # Methods always requiring some sort of wait to be useful
 
+    @retry_stale
     def clear(self):
         elem = self.wait("clickable")
         return elem.clear()
 
+    @retry_stale
     def click(self):
         elem = self.wait("clickable")
         return elem.click()
 
+    @retry_stale
     def send_keys(self, *args):
         elem = self.wait("clickable")
         return elem.send_keys(*args)
 
+    @retry_stale
     def select(self, **kwargs):
         elem = self.wait("clickable")
         return elem.select(**kwargs)
