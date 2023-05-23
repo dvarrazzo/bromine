@@ -13,16 +13,15 @@ on_pytest = 0
 
 def retry_stale(func):
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        timeout = 10
+    def wrapper(self, *args, **kwargs):
         start = time.time()
         while True:
             try:
-                return func(*args, **kwargs)
+                return func(self, *args, **kwargs)
             except StaleElementReferenceException as e:
-                if time.time() > start + timeout:
+                if time.time() > start + self._browser.timeout:
                     raise TimeoutException(
-                        f"Retry failed; {e} has been repeatedly raised for {timeout} seconds"
+                        f"Retry failed; {e} has been repeatedly raised for {self._browser.timeout} seconds"
                     )
                 time.sleep(1)
     return wrapper
@@ -38,7 +37,7 @@ class Browser:
 
     def __init__(self, driver):
         self._driver = driver
-        self.timeout = 2.0
+        self.timeout = 10.0
 
     def __getattr__(self, attr):
         return getattr(self._driver, attr)
